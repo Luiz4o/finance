@@ -2,11 +2,11 @@ import {Request,Response} from 'express'
 import { prisma } from '../database'
 
 export default{
-async createTransaction(request: Request, response: Response){
+async createExpense(request: Request, response: Response){
   try{
     const {cost,date,description,userId} = request.body
 
-    const transaction = await prisma.transaction.create({
+    const expense = await prisma.expense.create({
       data: {
         cost,
         description,
@@ -17,21 +17,21 @@ async createTransaction(request: Request, response: Response){
 
     return response.json({
       error: false,
-      message: 'Sucesso:Transação efetuada com Sucesso!',
-      transaction
+      message: 'Sucesso:Despesa adicionada com Sucesso!',
+      expense
     })
 
   }catch(error){
     return response.json({message: error.message})
   }
 },
-async listTransaction(request: Request, response: Response){
+async listExpense(request: Request, response: Response){
   try{
     const {id} = request.params
 
-    const transaction = await prisma.transaction.findUnique({where: {id: Number(id)}})
+    const expense = await prisma.expense.findUnique({where: {id: Number(id)}})
 
-    if(!transaction){
+    if(!expense){
       return response.json({
         error:true,
         message: 'Error: Não possui histórico!'
@@ -40,27 +40,38 @@ async listTransaction(request: Request, response: Response){
 
     return response.json({
       error: false,
-      transaction
+      expense
     })
 
   }catch(error){
     return response.json({message: error.message})
   }
 },
-async updateTransaction(request: Request, response: Response){
+async findAllExpense(request: Request, response: Response): Promise<void>{
+  try{
+    const {id} = request.params //Informe o id do usuario para busca
+
+    const expenses = await prisma.expense.findMany({where: {userId: Number(id)}})
+
+    response.status(200).json(expenses)}
+    catch(error){
+      response.status(500).json({message: 'Erro interno do servidor'})
+    }
+    },
+async updateExpense(request: Request, response: Response){
   try{
     const {id,cost, description} = request.body
 
-    const transactionExists = await prisma.transaction.findUnique({where: {id: Number(id)}})
+    const expenseExists = await prisma.expense.findUnique({where: {id: Number(id)}})
 
-    if(!transactionExists){
+    if(!expenseExists){
       return response.json({
         error:true,
         message: 'Error: Despeza não encontrada!'
       })
     }
 
-    const transaction = await prisma.transaction.update({
+    const expense = await prisma.expense.update({
       where: {
         id: Number(request.body.id)
       },
@@ -73,27 +84,27 @@ async updateTransaction(request: Request, response: Response){
     return response.json({
       error: false,
       message: 'Sucesso: Atualizado com sucesso!',
-      transaction
+      expense
     })
 
   }catch(error){
     return response.json({message: error.message})
   }
 },
-async deleteTransaction(request: Request, response: Response){
+async deleteExpense(request: Request, response: Response){
   try{
     const {id} = request.params
 
-    const transactionExists = await prisma.transaction.findUnique({where: {id: Number(id)}})
+    const expenseExists = await prisma.expense.findUnique({where: {id: Number(id)}})
 
-    if(!transactionExists){
+    if(!expenseExists){
       return response.json({
         error:true,
         message: 'Error: Despeza não encontrada!'
       })
     }
 
-    const transaction = await prisma.transaction.delete({
+    const expense = await prisma.expense.delete({
       where: {
         id: Number(request.params.id)
       }
@@ -102,7 +113,7 @@ async deleteTransaction(request: Request, response: Response){
     return response.json({
       error: false,
       message: 'Sucesso: Deletado com sucesso!',
-      transaction
+      expense
     })
 
   }catch(error){

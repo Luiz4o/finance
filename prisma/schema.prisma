@@ -14,12 +14,24 @@ model User{
   email String @unique
   password String
   amount Float?
-  transactions Transaction[]
+  recipes Recipe[]
+  expenses Expense[]
 
   @@map("users")
 }
 
-model Transaction{
+model Recipe{
+  id Int @id @default(autoincrement())
+  description String @db.VarChar(250)
+  price Float
+  date DateTime   @default(now())
+  user User @relation(fields: [userId], references: [id])
+  userId Int
+
+  @@map("recipes")
+}
+
+model Expense{
   id Int @id @default(autoincrement())
   description String @db.VarChar(250)
   cost Float
@@ -27,7 +39,7 @@ model Transaction{
   user User @relation(fields: [userId], references: [id])
   userId Int
 
-  @@map("transactions")
+  @@map("expenses")
 }
 
 

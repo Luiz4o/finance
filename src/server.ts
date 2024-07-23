@@ -1,6 +1,7 @@
 import  Express  from "express";
 import UserController from "./controllers/UserController";
-import TransactionController from "./controllers/TransactionController";
+import RecipeController from "./controllers/RecipeController";
+import ExpenseController from "./controllers/ExpenseController";
 
 const app = Express();
 app.use(Express.json())
@@ -11,13 +12,34 @@ app.get('/', (request, response) =>{
 })
 
 app.post('/createUser', UserController.createUser)
-app.post('/createTransaction', TransactionController.createTransaction)
 
-app.get('/listTransaction/:id', TransactionController.listTransaction)
+app.get('/listUser/:id',UserController.listUser)
 
-app.put('/updateTransaction', TransactionController.updateTransaction)
+app.get('/findAllUser/:id',UserController.findAllUser)
 
-app.delete('/deleteTransaction/:id', TransactionController.deleteTransaction)
+app.put('/updateUser', UserController.updateUser)
+
+app.delete('/deleteUser/:id', UserController.deleteUser)
+
+app.post('/createRecipe', RecipeController.createRecipe)
+
+app.get('/listRecipe/:id',RecipeController.listRecipe)
+
+app.get('/findAllRecipe/:id',RecipeController.findAllRecipe)
+
+app.put('/updateRecipe', RecipeController.updateRecipe)
+
+app.delete('/deleteRecipe/:id', RecipeController.deleteRecipe)
+
+app.post('/createExpense', ExpenseController.createExpense)
+
+app.get('/listExpense/:id',ExpenseController.listExpense)
+
+app.get('/findAllExpense/:id',ExpenseController.findAllExpense)
+
+app.put('/updateExpense', ExpenseController.updateExpense)
+
+app.delete('/deleteExpense/:id', ExpenseController.deleteExpense)
 
 
 app.listen(PORT, () =>{

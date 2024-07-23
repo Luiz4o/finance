@@ -1,47 +1,36 @@
 import {Request,Response} from 'express'
 import { prisma } from '../database'
-
 export default{
-async createUser(request: Request, response: Response){
+async createRecipe(request: Request, response: Response){
   try{
-    const {name, email,password} = request.body
-    const userExist = await prisma.user.findUnique({where: {email}})
+    const {price,date,description,userId} = request.body
 
-    const amount=0
-
-    if(userExist){
-      return response.json({
-        error: true,
-        message: 'Erro: Usuário já existe!'
-      })
-    }
-
-    const user = await prisma.user.create({
+    const recipe = await prisma.recipe.create({
       data: {
-        name,
-        email,
-        password,
-        amount
+        price,
+        description,
+        date,
+        userId
       }
     })
 
     return response.json({
       error: false,
-      message: 'Sucesso:Usuário cadastrado com Sucesso!',
-      user
+      message: 'Sucesso:Receita adicionada com Sucesso!',
+      recipe
     })
 
   }catch(error){
     return response.json({message: error.message})
   }
 },
-async listUser(request: Request, response: Response){
+async listRecipe(request: Request, response: Response){
   try{
     const {id} = request.params
 
-    const user = await prisma.user.findMany({where: {id: Number(id)}})
+    const recipe = await prisma.recipe.findUnique({where: {id: Number(id)}})
 
-    if(!user){
+    if(!recipe){
       return response.json({
         error:true,
         message: 'Error: Não possui histórico!'
@@ -50,72 +39,73 @@ async listUser(request: Request, response: Response){
 
     return response.json({
       error: false,
-      user
+      recipe
     })
 
   }catch(error){
     return response.json({message: error.message})
   }
 },
-async findAllUser(request: Request, response: Response): Promise<void>{
+async findAllRecipe(request: Request, response: Response): Promise<void>{
   try{
     const {id} = request.params //Informe o id do usuario para busca
 
-    const users = await prisma.user.findMany({where: {id: Number(id)}})
+    const recipes = await prisma.recipe.findMany({where: {userId: Number(id)}})
 
-    response.status(200).json(users)}
+    response.status(200).json(recipes)}
     catch(error){
       response.status(500).json({message: 'Erro interno do servidor'})
     }
-},
-async updateUser(request: Request, response: Response){
+    }
+
+,
+async updateRecipe(request: Request, response: Response){
   try{
-    const {name,email, password,id} = request.body
+    const {id,price, description} = request.body
 
-    const userExists = await prisma.user.findUnique({where: {id: Number(id)}})
+    const recipeExists = await prisma.recipe.findUnique({where: {id: Number(id)}})
 
-    if(!userExists){
+    if(!recipeExists){
       return response.json({
         error:true,
         message: 'Error: Despeza não encontrada!'
       })
     }
 
-    const user = await prisma.user.update({
+    const recipe = await prisma.recipe.update({
       where: {
         id: Number(request.body.id)
       },
       data: {
-        name,
-        email,
-        password
+        price,
+        description
       }
 
 })
     return response.json({
       error: false,
       message: 'Sucesso: Atualizado com sucesso!',
-      user
+      recipe
     })
 
   }catch(error){
     return response.json({message: error.message})
   }
 },
-async deleteUser(request: Request, response: Response){
+async deleteRecipe(request: Request, response: Response){
   try{
     const {id} = request.params
 
-    const userExists = await prisma.user.findUnique({where: {id: Number(id)}})
+    const recipeExists = await prisma.recipe.findUnique({where: {id: Number(id)}})
 
-    if(!userExists){
+    if(!recipeExists){
       return response.json({
         error:true,
         message: 'Error: Despeza não encontrada!'
       })
     }
 
-    const user = await prisma.user.delete({
+    const recipe = await prisma.recipe.delete({
       where: {
         id: Number(request.params.id)
       }
@@ -124,7 +114,7 @@ async deleteUser(request: Request, response: Response){
     return response.json({
       error: false,
       message: 'Sucesso: Deletado com sucesso!',
-      user
+      recipe
     })
 
   }catch(error){
