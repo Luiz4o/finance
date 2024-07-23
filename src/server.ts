@@ -2,8 +2,14 @@ import  Express  from "express";
 import UserController from "./controllers/UserController";
 import RecipeController from "./controllers/RecipeController";
 import ExpenseController from "./controllers/ExpenseController";
+import cors from 'cors'
 
 const app = Express();
+
+app.use(cors({
+//  origin:'http://localhost:5173'
+}));
+
 app.use(Express.json())
 const PORT = 8000
 
