@@ -12,8 +12,7 @@ model User{
   id Int @id @default(autoincrement())
   name String
   email String @unique
-  password String
-  amount Float?
+  hashPassword String @db.VarChar(60)
   recipes Recipe[]
   expenses Expense[]
 

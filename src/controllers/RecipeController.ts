@@ -3,13 +3,12 @@ import { prisma } from '../database'
 export default{
 async createRecipe(request: Request, response: Response){
   try{
-    const {price,date,description,userId} = request.body
+    const {price,description,userId} = request.body
 
     const recipe = await prisma.recipe.create({
       data: {
         price,
         description,
-        date,
         userId
       }
     })
@@ -49,10 +48,13 @@ async listRecipe(request: Request, response: Response){
 async findAllRecipe(request: Request, response: Response): Promise<void>{
   try{
     const {id} = request.params //Informe o id do usuario para busca
+    console.log('convertId:', id)
 
     const recipes = await prisma.recipe.findMany({where: {userId: Number(id)}})
-
-    response.status(200).json(recipes)}
+    const recipesUser = recipes.filter(recipe =>(recipe.userId))
+    console.log(recipes)
+    console.log(recipesUser)
+    response.status(200).json(recipesUser)}
     catch(error){
       response.status(500).json({message: 'Erro interno do servidor'})
     }
@@ -61,9 +63,9 @@ async findAllRecipe(request: Request, response: Response): Promise<void>{
 ,
 async updateRecipe(request: Request, response: Response){
   try{
-    const {id,price, description} = request.body
+    const {Id,price, description} = request.body
 
-    const recipeExists = await prisma.recipe.findUnique({where: {id: Number(id)}})
+    const recipeExists = await prisma.recipe.findUnique({where: {id: Id}})
 
     if(!recipeExists){
       return response.json({

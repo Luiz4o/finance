@@ -1,13 +1,15 @@
 import {Request,Response} from 'express'
 import { prisma } from '../database'
+import bcrypt from 'bcrypt'
+
+const jwt = require('jsonwebtoken')
 
 export default{
+
 async createUser(request: Request, response: Response){
   try{
     const {name, email,password} = request.body
     const userExist = await prisma.user.findUnique({where: {email}})
-
-    const amount=0
 
     if(userExist){
       return response.json({
@@ -16,35 +18,74 @@ async createUser(request: Request, response: Response){
       })
     }
 
-    const user = await prisma.user.create({
+    const salt = await bcrypt.genSalt(10)
+    const hashPassword = await bcrypt.hash(password, salt)
+
+    const newUser = await prisma.user.create({
       data: {
         name,
         email,
-        password,
-        amount
+        hashPassword
       }
+
     })
 
     return response.json({
       error: false,
       message: 'Sucesso:Usuário cadastrado com Sucesso!',
-      user
+      newUser
     })
 
   }catch(error){
     return response.json({message: error.message})
   }
 },
+async loginUser(request: Request, response: Response){
+  const{email, password} =request.body
+
+  const user = await prisma.user.findUnique({where: {email}})
+
+    if(!user){
+      return response.status(401).json({
+        message: 'Erro: Email ou senha inválidos!'
+      })
+    }
+
+    const verifyUser = await bcrypt.compare(password, user.hashPassword)
+
+    if(!verifyUser){
+      return response.status(401).json({
+        message: 'Erro: Email ou senha inválidos!'
+      })
+    }
+
+    try{
+      const secret = process.env.SECRET
+
+      const token = jwt.sign({
+        id: user.id,
+      },
+    secret,
+  )
+
+  return response.status(200).json({message:'Autenticação realizada com sucesso',token,id: user.id})
+    } catch(error){
+      console.log(error)
+    }
+
+
+}
+,
 async listUser(request: Request, response: Response){
   try{
     const {id} = request.params
 
-    const user = await prisma.user.findMany({where: {id: Number(id)}})
+    const user = await prisma.user.findMany({where: {id: Number(id)},select: {id: true,name: true,email: true}})
 
     if(!user){
       return response.json({
         error:true,
-        message: 'Error: Não possui histórico!'
+        message: 'Error: Não possui Usuario cadastrado!'
       })
     }
 
@@ -57,25 +98,14 @@ async listUser(request: Request, response: Response){
     return response.json({message: error.message})
   }
 },
-async findAllUser(request: Request, response: Response): Promise<void>{
-  try{
-    const {id} = request.params //Informe o id do usuario para busca
-
-    const users = await prisma.user.findMany({where: {id: Number(id)}})
-
-    response.status(200).json(users)}
-    catch(error){
-      response.status(500).json({message: 'Erro interno do servidor'})
-    }
-},
 async updateUser(request: Request, response: Response){
   try{
-    const {name,email, password,id} = request.body
+    const {name,email, hashPassword,id} = request.body
 
     const userExists = await prisma.user.findUnique({where: {id: Number(id)}})
 
     if(!userExists){
-      return response.json({
+      return response.status(401).json({
         error:true,
         message: 'Error: Despeza não encontrada!'
       })
@@ -88,18 +118,18 @@ async updateUser(request: Request, response: Response){
       data: {
         name,
         email,
-        password
+        hashPassword
       }
 
 })
-    return response.json({
+    return response.status(200).json({
       error: false,
       message: 'Sucesso: Atualizado com sucesso!',
       user
     })
 
   }catch(error){
-    return response.json({message: error.message})
+    return response.status(401).json({message: error.message})
   }
 },
 async deleteUser(request: Request, response: Response){
@@ -109,9 +139,9 @@ async deleteUser(request: Request, response: Response){
     const userExists = await prisma.user.findUnique({where: {id: Number(id)}})
 
     if(!userExists){
-      return response.json({
+      return response.status(401).json({
         error:true,
-        message: 'Error: Despeza não encontrada!'
+        message: 'Error: Usuario não encontrado!'
       })
     }
 
@@ -121,14 +151,14 @@ async deleteUser(request: Request, response: Response){
       }
 
 })
-    return response.json({
+    return response.status(200).json({
       error: false,
       message: 'Sucesso: Deletado com sucesso!',
       user
     })
 
   }catch(error){
-    return response.json({message: error.message})
+    return response.status(401).json({message: error.message})
   }
 }
 }

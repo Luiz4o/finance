@@ -25,35 +25,36 @@ async createExpense(request: Request, response: Response){
     return response.json({message: error.message})
   }
 },
-async listExpense(request: Request, response: Response){
-  try{
-    const {id} = request.params
+// async listExpense(request: Request, response: Response){
+//   try{
+//     const {id} = request.params
 
-    const expense = await prisma.expense.findUnique({where: {id: Number(id)}})
+//     const expense = await prisma.expense.findUnique({where: {id: Number(id)}})
 
-    if(!expense){
-      return response.json({
-        error:true,
-        message: 'Error: Não possui histórico!'
-      })
-    }
+//     if(!expense){
+//       return response.json({
+//         error:true,
+//         message: 'Error: Não possui histórico!'
+//       })
+//     }
 
-    return response.json({
-      error: false,
-      expense
-    })
+//     return response.json({
+//       error: false,
+//       expense
+//     })
 
-  }catch(error){
-    return response.json({message: error.message})
-  }
-},
+//   }catch(error){
+//     return response.json({message: error.message})
+//   }
+// }
 async findAllExpense(request: Request, response: Response): Promise<void>{
   try{
     const {id} = request.params //Informe o id do usuario para busca
+    console.log('convertId:', id)
 
     const expenses = await prisma.expense.findMany({where: {userId: Number(id)}})
-
-    response.status(200).json(expenses)}
+    const expensesUser = expenses.filter(expense =>(expense.userId))
+    response.status(200).json(expensesUser)}
     catch(error){
       response.status(500).json({message: 'Erro interno do servidor'})
     }
